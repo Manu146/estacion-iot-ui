@@ -4,6 +4,8 @@ const intervalTimes = [2, 5, 10, 15, 30, 60];
 
 const ipRegex = /^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/;
 
+const BASE_API_URL = "http://localhost:3000/";
+
 const initialConfig = {
   mode: "1",
   ssid: "pedro",
@@ -29,6 +31,15 @@ const errorStyle =
 const baseStyle =
   "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
+const fetchConfig = async () => {
+  const res = await fetch(BASE_API_URL + "config");
+  return await res.json();
+};
+
+const saveConfig = (data) => {
+  console.log(data);
+};
+
 export default function ConfigForm() {
   //const [currentConfig, setCurrentConfig] = useState(null);
   const [formData, setFormData] = useState(defaultConfig);
@@ -39,12 +50,22 @@ export default function ConfigForm() {
     ip: false,
     gateway: false,
   });
+  const [selectedVariable, setSelectedVariable] = useState("");
+  const [variableLimits, setVariableLimits] = useState({
+    min: "",
+    max: "",
+  });
 
   const { ssid, pass, ip, gateway, mode, interval, admin_pass } = formData;
-
-  useEffect(() => {
+  //TODO Fix variables min-max state, and validation
+  useEffect(async () => {
     //Cargar data
-    setFormData((p) => ({ ...p, ...initialConfig }));
+    //setFormData((p) => ({ ...p, ...initialConfig }));
+    try {
+      setFormData(await fetchConfig());
+    } catch (error) {
+      console.log("Error al cargar configuración");
+    }
   }, []);
 
   const onSubmit = () => {
@@ -54,12 +75,13 @@ export default function ConfigForm() {
       pass: false,
       ip: false,
       gateway: false,
+      variableLimits: false,
     };
 
     if (admin_pass === "") validation = { ...validation, admin_pass: true };
     if (ssid === "") validation = { ...validation, ssid: true };
     if (pass === "" && !noPw) validation = { ...validation, pass: true };
-    if (mode === 1) {
+    if (mode === "1") {
       if (ip === "" || !ipRegex.test(ip))
         validation = { ...validation, ip: true };
       if (gateway === "" || !ipRegex.test(gateway))
@@ -75,10 +97,23 @@ export default function ConfigForm() {
         validation.admin_pass
       )
     ) {
-      return 0;
+      if (
+        selectedVariable &&
+        (variableLimits.min <= 0 ||
+          variableLimits.max <= 0 ||
+          variableLimits.min >= variableLimits.max)
+      ) {
+        validation = { ...validation, variableLimits: true };
+      } else {
+        const configData = {
+          ...formData,
+          [`${selectedVariable}_min`]: variableLimits.min,
+          [`${selectedVariable}_max`]: variableLimits.max,
+        };
+        saveConfig(configData);
+        return 0;
+      }
     }
-    //return submitForm();
-
     setErrors(validation);
   };
 
@@ -108,6 +143,8 @@ export default function ConfigForm() {
   const factoryReset = () => {
     console.log("Reset de fábrica");
   };
+
+  const variables = ["temperature", "humidity", "pressure"]; // Add your variables here
 
   return (
     <div className="bg-gray-50 shadow-sm dark:bg-gray-800 p-6 rounded-lg border-2 dark:border-gray-700 border-gray-100">
@@ -314,6 +351,77 @@ export default function ConfigForm() {
             ))}
           </select>
         </div>
+        <div class="inline-flex items-center justify-center w-full">
+          <hr class="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+          <span class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-gray-50 left-1/2 dark:text-white dark:bg-gray-800">
+            Límites de variables
+          </span>
+        </div>
+        <div className="mb-5">
+          <label
+            for="variable"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Seleccione variable
+          </label>
+          <select
+            id="variable"
+            value={selectedVariable}
+            name="variable"
+            onChange={(e) => setSelectedVariable(e.target.value)}
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="">Seleccione una variable</option>
+            {variables.map((variable) => (
+              <option key={variable} value={variable}>
+                {variable}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div class="mb-5">
+          <label
+            for="variable_min"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Valor mínimo
+          </label>
+          <input
+            type="number"
+            id="variable_min"
+            class={baseStyle}
+            name="variable_min"
+            onInput={(e) =>
+              setVariableLimits({ ...variableLimits, min: e.target.value })
+            }
+            value={variableLimits.min}
+          />
+        </div>
+        <div class="mb-5">
+          <label
+            for="variable_max"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Valor máximo
+          </label>
+          <input
+            type="number"
+            id="variable_max"
+            class={baseStyle}
+            name="variable_max"
+            onInput={(e) =>
+              setVariableLimits({ ...variableLimits, max: e.target.value })
+            }
+            value={variableLimits.max}
+          />
+        </div>
+        {errors.variableLimits && (
+          <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+            <span class="font-medium">
+              {`El valor máximo debe ser mayor que el valor mínimo y ambos deben ser mayores que 0 para la variable ${selectedVariable}.`}
+            </span>
+          </p>
+        )}
         <button
           type="submit"
           class="text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-base px-5 py-3 text-center me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"

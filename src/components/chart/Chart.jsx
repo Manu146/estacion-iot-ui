@@ -2,6 +2,8 @@ import LineChart from "./LineChart";
 import Calendar from "./Calendar";
 import { useState, useMemo, useEffect } from "preact/hooks";
 
+const BASE_API_URL = "http://localhost:3000/";
+
 function generateTemperatureData() {
   // Start time: July 10, 2024 00:00:00 UTC
   const startDate = new Date(Date.UTC(2024, 6, 10)); // Note: Months are 0-based (6 = July)
@@ -132,34 +134,63 @@ function parseFrequency(frequency) {
   return { type: frequency, interval: null };
 }
 
-const fetchDayData = (selectedDate, variable) => {
+const fetchDayData = async (selectedDate, variable) => {
   console.log("day");
   const { year, month, day } = selectedDate;
-  return generateWeatherData(
+  /*return generateWeatherData(
     variable,
     "daily/5",
     new Date(Date.UTC(year, month + 1, day))
+  );*/
+  const res = await fetch(
+    `${BASE_API_URL}data?start=${new Date(
+      Date.UTC(year, month + 1, day)
+    ).valueOf()}&sensor=${variable}&frequency=daily`
   );
+  return await res.json();
 };
 
-const fetchDayAvgs = (selectedDate, variable) => {
+const fetchDayAvgs = async (selectedDate, variable) => {
   console.log("month");
   const { year, month } = selectedDate;
-  return generateWeatherData(
+  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf();
+  let end = new Date(Date.UTC(year, month + 2, 1)).valueOf();
+  /*return generateWeatherData(
     variable,
     "monthly",
     new Date(Date.UTC(year, month + 1, 1))
+  );*/
+  let res = await fetch(
+    `${BASE_API_URL}data?start=${start}&end=${end}&sensor=${variable}&frequency=monthly`
   );
+  return await res.json();
 };
 
-const fetchMonthAvgs = (selectedDate, variable) => {
+const fetchMonthAvgs = async (selectedDate, variable) => {
   console.log("year");
   const { year } = selectedDate;
-  return generateWeatherData(
+  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf();
+  let end = new Date(Date.UTC(year + 1, month + 1, 1)).valueOf();
+  /*return generateWeatherData(
     variable,
-    "yearly",
-    new Date(Date.UTC(year, 0, 1))
+    "monthly",
+    new Date(Date.UTC(year, month + 1, 1))
+  );*/
+  let res = await fetch(
+    `${BASE_API_URL}data?start=${start}&end=${end}&sensor=${variable}&frequency=monthly`
   );
+  return await res.json();
+};
+
+const fetchAvailableDates = async () => {
+  try {
+    const response = await fetch(`${BASE_API_URL}dates`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching available dates:", error);
+    return null;
+  }
 };
 
 const formatData = (data, frequency) => {
@@ -239,25 +270,25 @@ export default function Chart() {
   );
 
   useEffect(() => {
-    const data = generateTemperatureData();
-    const days = [data.first.utc.split("T")[0], data.last.utc.split("T")[0]];
-    setAvailableDays(days);
+    fetchAvailableDates().then((data) => setAvailableDays(data));
   }, []);
 
-  useEffect(() => {
-    const { day, year, month } = selectedDate;
-    const datePresent = !!day || !!year || !!month;
+  useEffect(async () => {
+    try {
+      const { day, year, month } = selectedDate;
+      const datePresent = !!day || !!year || !!month;
 
-    if (!frequency || !datePresent || !variable) return;
+      if (!frequency || !datePresent || !variable) return;
 
-    if (frequency === "days" && !!day && !!year && !!month)
-      return setFetchedData(fetchDayData(selectedDate, variable));
+      if (frequency === "days" && !!day && !!year && !!month)
+        return setFetchedData(await fetchDayData(selectedDate, variable));
 
-    if (frequency === "months" && !!year && !!month)
-      return setFetchedData(fetchDayAvgs(selectedDate, variable));
+      if (frequency === "months" && !!year && !!month)
+        return setFetchedData(await fetchDayAvgs(selectedDate, variable));
 
-    if (frequency === "years" && !!year)
-      return setFetchedData(fetchMonthAvgs(selectedDate, variable));
+      if (frequency === "years" && !!year)
+        return setFetchedData(await fetchMonthAvgs(selectedDate, variable));
+    } catch (e) {}
   }, [frequency, selectedDate, variable]);
 
   //console.log(chartData);

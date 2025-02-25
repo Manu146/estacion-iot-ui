@@ -31,7 +31,7 @@ const endDate = new Date("2024-04-31T23:59:59");*/
 
 export function App() {
   const [view, setView] = useState("data"); //Data, Config
-  const [ready, val, send] = useWs("ws://localhost:3000"); //`ws://${window.location.host}/ws`);
+  const [ready, val, send, status] = useWs("ws://localhost:3000"); //`ws://${window.location.host}/ws`);
   const [displayData, setDisplayData] = useState({});
   const [criticalData, setCriticalData] = useState({});
   /*const testData = useMemo(
@@ -57,7 +57,20 @@ export function App() {
       <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
         Estación meteorológica IoT
       </h1>
-      <div className="container flex justify-end w-full">
+      <div className="container flex justify-between w-full">
+        <div className="bg-gray-50 shadow-sm dark:bg-gray-800  dark:border-gray-600 border-gray-100 border-2 rounded-lg p-4 flex justify-center items-center">
+          {status !== "connected" && status !== "disconnected" && (
+            <div class="px-3 py-1 text-xs font-medium leading-none text-center text-blue-800 bg-blue-200 rounded-full animate-pulse dark:bg-blue-900 dark:text-blue-200">
+              Conectando...
+            </div>
+          )}
+          {status === "connected" && (
+            <span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
+              <span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
+              Conectado
+            </span>
+          )}
+        </div>
         <button
           type="button"
           onClick={() => setView(view === "data" ? "config" : "data")}
