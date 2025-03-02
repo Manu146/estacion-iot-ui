@@ -143,9 +143,9 @@ const fetchDayData = async (selectedDate, variable) => {
     new Date(Date.UTC(year, month + 1, day))
   );*/
   const res = await fetch(
-    `${BASE_API_URL}data?start=${new Date(
+    `${BASE_API_URL}datos?inicio=${new Date(
       Date.UTC(year, month + 1, day)
-    ).valueOf()}&sensor=${variable}&frequency=daily`
+    ).valueOf()}&variable=${variable}&frecuencia=diario`
   );
   return await res.json();
 };
@@ -161,7 +161,7 @@ const fetchDayAvgs = async (selectedDate, variable) => {
     new Date(Date.UTC(year, month + 1, 1))
   );*/
   let res = await fetch(
-    `${BASE_API_URL}data?start=${start}&end=${end}&sensor=${variable}&frequency=monthly`
+    `${BASE_API_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencio=mensual`
   );
   return await res.json();
 };
@@ -177,14 +177,14 @@ const fetchMonthAvgs = async (selectedDate, variable) => {
     new Date(Date.UTC(year, month + 1, 1))
   );*/
   let res = await fetch(
-    `${BASE_API_URL}data?start=${start}&end=${end}&sensor=${variable}&frequency=monthly`
+    `${BASE_API_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=anual`
   );
   return await res.json();
 };
 
 const fetchAvailableDates = async () => {
   try {
-    const response = await fetch(`${BASE_API_URL}dates`);
+    const response = await fetch(`${BASE_API_URL}fechas`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -196,8 +196,8 @@ const fetchAvailableDates = async () => {
 const formatData = (data, frequency) => {
   if (!data || !frequency) return null;
   if (frequency === "days") {
-    const dataPoints = data.map(({ t, value }) => value);
-    const labels = data.map(({ t, value }) => {
+    const dataPoints = data.map(({ t, valor }) => valor);
+    const labels = data.map(({ t, valor }) => {
       const d = new Date(t * 1000);
       return `${d.getUTCHours().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
@@ -211,8 +211,8 @@ const formatData = (data, frequency) => {
   }
 
   if (frequency === "months") {
-    const dataPoints = data.map(({ t, value }) => value);
-    const labels = data.map(({ t, value }) => {
+    const dataPoints = data.map(({ t, valor }) => valor);
+    const labels = data.map(({ t, valor }) => {
       const d = new Date(t * 1000);
       return `${d.getUTCDate().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
@@ -224,8 +224,8 @@ const formatData = (data, frequency) => {
     });
     return { dataPoints, labels };
   }
-  const dataPoints = data.map(({ t, value }) => value);
-  const labels = data.map(({ t, value }) => {
+  const dataPoints = data.map(({ t, valor }) => valor);
+  const labels = data.map(({ t, valor }) => {
     const d = new Date(t * 1000);
     return `${(d.getUTCMonth() + 1).toLocaleString("en-US", {
       minimumIntegerDigits: 2,
@@ -281,13 +281,19 @@ export default function Chart() {
       if (!frequency || !datePresent || !variable) return;
 
       if (frequency === "days" && !!day && !!year && !!month)
-        return setFetchedData(await fetchDayData(selectedDate, variable));
+        return setFetchedData(
+          (await fetchDayData(selectedDate, variable)).data
+        );
 
       if (frequency === "months" && !!year && !!month)
-        return setFetchedData(await fetchDayAvgs(selectedDate, variable));
+        return setFetchedData(
+          (await fetchDayAvgs(selectedDate, variable)).data
+        );
 
       if (frequency === "years" && !!year)
-        return setFetchedData(await fetchMonthAvgs(selectedDate, variable));
+        return setFetchedData(
+          (await fetchMonthAvgs(selectedDate, variable)).data
+        );
     } catch (e) {}
   }, [frequency, selectedDate, variable]);
 
@@ -295,14 +301,23 @@ export default function Chart() {
 
   if (availableDays)
     return (
-      <div className="container shadow-sm dark:bg-gray-800 bg-gray-50 p-6 rounded-lg border-2 dark:border-gray-700 border-gray-100">
+      <div className="shadow-sm mt-4 dark:bg-gray-900 bg-white p-6 rounded-lg border dark:border-gray-700 border-gray-200">
+        <div className="mb-2">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Gráfico de datos meteorológicos
+          </h3>
+          <p className="text-sm text-gray-400">
+            Seleccione una variable, rango y frecuencia para visualizar los
+            datos
+          </p>
+        </div>
         <div className="flex justify-normal flex-col gap-y-3 md:flex-row md:justify-between md:gap-y-0">
           <div className="">
             <label
               for="variable"
               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              Selecciona una variable:
+              Variable:
             </label>
             <select
               id="variable"

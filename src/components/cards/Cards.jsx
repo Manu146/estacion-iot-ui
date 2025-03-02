@@ -2,7 +2,7 @@ import Card from "./Card";
 
 export default function Cards({ data }) {
   return (
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 container bg-gray-50 shadow-sm dark:bg-gray-800 p-6 rounded-lg border-2 dark:border-gray-700 border-gray-100">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-4">
       <Card
         title="temperatura"
         value={data?.temperatura?.valor.toPrecision(3) || "--"}

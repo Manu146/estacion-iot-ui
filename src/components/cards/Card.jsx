@@ -31,17 +31,18 @@ export default function Card({ value, title, variable }) {
   const unit = variables[variable].unit;
   const style = variables[variable]?.style;
   return (
-    <div className="flex flex-col items-center">
-      <div className="align-top flex items-center pr-8">
-        <Icon size={64} className={style} />
-        <h1 class="text-8xl font-bold font-mono text-gray-900 dark:text-white">
-          {value}
-          <span className="text-lg inline-block pt-3 align-top">{unit}</span>
-        </h1>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-900">
+      <div className="p-6 flex flex-row items-center justify-between pb-2">
+        <h3 className="text-sm font-semibold text-gray-950 dark:text-white">
+          {capitalize(title)}
+        </h3>
+        <Icon size={24} className="text-gray-500" />
       </div>
-      <h4 class="text-xl w-full font-normal text-gray-500 dark:text-gray-400 text-center">
-        {capitalize(title)}
-      </h4>
+      <div className="p-6 pt-0">
+        <span className="text-3xl font-bold text-gray-950 dark:text-white">
+          {value} {unit}
+        </span>
+      </div>
     </div>
   );
 }

@@ -1,92 +1,131 @@
 import { useState, useEffect } from "preact/hooks";
 import { Settings, MoveLeft } from "lucide-preact";
-import { useWs } from "./hooks/useWs";
+import Modal from "react-modal";
+import { useWebSocket, ReadyState } from "./hooks/useWs";
 import Cards from "./components/cards/Cards";
 import Chart from "./components/chart/Chart";
-import ConfigForm from "./configForm/configForm";
+import ConfigTab from "./ConfigTab/ConfigTab";
+import Notifiactions from "./components/Notifications/Notificacions";
 
-/*function generateTestData(startDate, endDate) {
-  const data = [];
-  let currentTime = startDate.getTime();
+Modal.setAppElement("#app");
 
-  while (currentTime <= endDate.getTime()) {
-    // Simulate temperature fluctuations (you can customize this)
-    const baseTemp = 20; // Adjust the base temperature
-    const fluctuation =
-      Math.sin((currentTime / (1000 * 60 * 60 * 24)) * 2 * Math.PI) * 5; // Sinusoidal fluctuation
-    const randomNoise = (Math.random() - 0.5) * 2; // Small random noise
+const stringToday = new Date(Date.now()).toLocaleDateString("es-ES", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
-    const temperature = baseTemp + fluctuation + randomNoise;
-
-    data.push([currentTime / 1000, parseFloat(temperature.toFixed(2))]); // Unix timestamp, temperature (2 decimal places)
-
-    currentTime += 60 * 60 * 1000; // Increment by 5 minutes (in milliseconds)
-  }
-
-  return data;
-}
-
-const startDate = new Date("2024-03-01T00:00:00");
-const endDate = new Date("2024-04-31T23:59:59");*/
+//TODO Obtener configuracion, si falta algo, mostrar notificacion
+//TODO Probar autenticacion con servidor de prueba
 
 export function App() {
   const [view, setView] = useState("data"); //Data, Config
-  const [ready, val, send, status] = useWs("ws://localhost:3000"); //`ws://${window.location.host}/ws`);
+  const { readyState, lastMessage, send, status } = useWebSocket(
+    "ws://localhost:3000/tiemporeal"
+  ); //`ws://${window.location.host}/ws`);
   const [displayData, setDisplayData] = useState({});
-  const [criticalData, setCriticalData] = useState({});
-  /*const testData = useMemo(
-    () => generateTestData(startDate, endDate),
-    [startDate, endDate]
-  );*/
-  useEffect(() => {
-    if (ready) {
-      send("test message");
-    }
-  }, [ready, send]); // make sure to include send in dependency array
+  const [notifications, setNotifications] = useState({
+    critical: [],
+    info: [],
+  });
+
+  const backFn = () => setView("data");
+
+  const dismissFn = (index) => {
+    setNotifications((p) => ({
+      ...p,
+      critial: p["critical"].splice(index, 1),
+    }));
+  };
 
   useEffect(() => {
-    if (val) {
-      if (val.type === "sensorData") setDisplayData(val.data);
-      if (val.type === "criticalData") setCriticalData(val.data);
+    if (readyState === ReadyState.OPEN) {
+      send("test message");
     }
-  }, [val]);
+  }, [readyState, send]); // make sure to include send in dependency array
+
+  useEffect(() => {
+    if (lastMessage) {
+      if (lastMessage.tipo === "datos") setDisplayData(lastMessage.data);
+      if (lastMessage.tipo === "alarma") {
+        const newCritical = lastMessage.data;
+        setNotifications((p) => ({
+          ...p,
+          critical: [newCritical, ...p["critical"]],
+        }));
+      }
+    }
+  }, [lastMessage]);
 
   const Icon = view === "data" ? Settings : MoveLeft;
   return (
-    <div className="flex items-center flex-col pt-8 gap-y-6 p-4">
-      <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-        Estación meteorológica IoT
-      </h1>
-      <div className="container flex justify-between w-full">
-        <div className="bg-gray-50 shadow-sm dark:bg-gray-800  dark:border-gray-600 border-gray-100 border-2 rounded-lg p-4 flex justify-center items-center">
-          {status !== "connected" && status !== "disconnected" && (
-            <div class="px-3 py-1 text-xs font-medium leading-none text-center text-blue-800 bg-blue-200 rounded-full animate-pulse dark:bg-blue-900 dark:text-blue-200">
-              Conectando...
-            </div>
-          )}
-          {status === "connected" && (
-            <span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
-              <span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
-              Conectado
-            </span>
-          )}
+    <main className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 class="mb-6 text-3xl font-bold leading-none tracking-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
+          Estación meteorológica IoT UC
+        </h1>
+        <div className="h-10 items-center justify-center rounded-md bg-gray-100 text-gray-400 dark:bg-gray-700 p-1 dark:text-gray-400 grid w-full grid-cols-2">
+          <button
+            onClick={() => setView("data")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              view === "data"
+                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50"
+                : "bg-inherit text-inherit"
+            }`}
+          >
+            Visualización
+          </button>
+          <button
+            onClick={() => setView("config")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              view === "config"
+                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50"
+                : "bg-inherit text-inherit"
+            }`}
+          >
+            Configuración
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setView(view === "data" ? "config" : "data")}
-          class="text-gray-600 bg-gray-50 hover:bg-blue-200 focus:ring-4 focus:outline-none focus:ring-blue-100 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 border-2 dark:border-gray-600 border-gray-100 dark:text-white"
-        >
-          <Icon size={32} />
-          <span class="sr-only">Icon description</span>
-        </button>
+        {view === "data" && (
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm-items-center mt-4">
+            <div className="">
+              <h2 className="text-xl font-semibold text-gray-950 dark:text-white">
+                Datos meteorológicos actuales
+              </h2>
+              <p className="text-gray-400 font-medium">{stringToday}</p>
+            </div>
+            <div>
+              {readyState === ReadyState.CLOSED && (
+                <span class="inline-flex items-center bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
+                  <span class="w-2 h-2 me-1 bg-red-500 rounded-full"></span>
+                  Desconectado
+                </span>
+              )}
+              {readyState === ReadyState.CONNECTING && (
+                <span class="inline-flex items-center bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300 animate-pulse">
+                  <span class="w-2 h-2 me-1 bg-blue-500 rounded-full"></span>
+                  Conectando...
+                </span>
+              )}
+              {readyState === ReadyState.OPEN && (
+                <span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
+                  <span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
+                  Conectado
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        <Notifiactions notifications={notifications} dismissFn={dismissFn} />
+        {view === "data" && (
+          <>
+            <Cards data={displayData}></Cards>
+            <Chart />
+          </>
+        )}
+        {view === "config" && <ConfigTab backFn={backFn} />}
       </div>
-      {view === "data" && (
-        <>
-          <Cards data={displayData}></Cards>
-          <Chart />
-        </>
-      )}
-      {view === "config" && <ConfigForm />}
-    </div>
+    </main>
   );
 }
