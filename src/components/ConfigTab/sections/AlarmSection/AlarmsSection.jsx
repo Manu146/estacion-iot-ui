@@ -2,7 +2,7 @@ import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import AlarmCard from "./AlarmCard";
 import CreateAlarm from "./CreateAlarm";
-import { BASE_URL } from "../../../config";
+import { BASE_URL } from "../../../../config";
 
 //const variables = ["Temperatura", "Humedad", "Presión"];
 const variables = [

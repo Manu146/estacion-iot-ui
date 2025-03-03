@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../../config";
 
 const intervalTimes = [2, 5, 10, 15, 30, 60];
 

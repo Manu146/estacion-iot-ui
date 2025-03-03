@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../../config";
 
 const ipRegex = /^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/;
 

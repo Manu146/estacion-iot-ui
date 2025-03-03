@@ -4,7 +4,7 @@ import Modal from "react-modal";
 import { useWebSocket, ReadyState } from "./hooks/useWs";
 import Cards from "./components/cards/Cards";
 import Chart from "./components/chart/Chart";
-import ConfigTab from "./ConfigTab/ConfigTab";
+import ConfigTab from "./components/ConfigTab/ConfigTab";
 import Notifiactions from "./components/Notifications/Notificacions";
 
 Modal.setAppElement("#app");
@@ -24,7 +24,7 @@ export function App() {
   const { readyState, lastMessage, send, status } = useWebSocket(
     "ws://localhost:3000/tiemporeal"
   ); //`ws://${window.location.host}/ws`);
-  const [displayData, setDisplayData] = useState({});
+  const [displayData, setDisplayData] = useState(null);
   const [notifications, setNotifications] = useState({
     critical: [],
     info: [],
