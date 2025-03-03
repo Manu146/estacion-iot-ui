@@ -143,9 +143,9 @@ const fetchDayData = async (selectedDate, variable) => {
     new Date(Date.UTC(year, month + 1, day))
   );*/
   const res = await fetch(
-    `${BASE_API_URL}datos?inicio=${new Date(
-      Date.UTC(year, month + 1, day)
-    ).valueOf()}&variable=${variable}&frecuencia=diario`
+    `${BASE_API_URL}datos?inicio=${
+      new Date(Date.UTC(year, month + 1, day)).valueOf() / 1000
+    }&variable=${variable}&frecuencia=diario`
   );
   return await res.json();
 };
@@ -153,8 +153,8 @@ const fetchDayData = async (selectedDate, variable) => {
 const fetchDayAvgs = async (selectedDate, variable) => {
   console.log("month");
   const { year, month } = selectedDate;
-  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf();
-  let end = new Date(Date.UTC(year, month + 2, 1)).valueOf();
+  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf() / 1000;
+  let end = new Date(Date.UTC(year, month + 2, 1)).valueOf() / 1000;
   /*return generateWeatherData(
     variable,
     "monthly",
@@ -169,8 +169,8 @@ const fetchDayAvgs = async (selectedDate, variable) => {
 const fetchMonthAvgs = async (selectedDate, variable) => {
   console.log("year");
   const { year } = selectedDate;
-  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf();
-  let end = new Date(Date.UTC(year + 1, month + 1, 1)).valueOf();
+  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf() / 1000;
+  let end = new Date(Date.UTC(year + 1, month + 1, 1)).valueOf() / 1000;
   /*return generateWeatherData(
     variable,
     "monthly",
