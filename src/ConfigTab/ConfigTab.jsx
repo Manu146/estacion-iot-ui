@@ -16,17 +16,6 @@ import ConfigSectionCard from "./ConfigSectionCard";
 import CalibrationSection from "./CalibrationSection";
 import ExternalServerSection from "./sections/ExternalServerSection";
 
-const BASE_API_URL = "http://localhost:3000/";
-
-const fetchConfig = async () => {
-  const res = await fetch(BASE_API_URL + "config");
-  return await res.json();
-};
-
-const saveConfig = (data) => {
-  console.log(data);
-};
-
 const viewComponets = {
   wifi: WifiSection,
   data: DataSection,
@@ -68,6 +57,9 @@ const configCards = {
     title: "Restablecer dispositivo",
   },
 };
+
+//TODO Autenticacion
+//TODO Agregar seccion autenticacion (modificar contraseña de admin)
 
 export default function ConfigTab({ backFn }) {
   const [configView, setConfigView] = useState("");

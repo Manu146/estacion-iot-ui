@@ -1,36 +1,62 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
+import { BASE_URL } from "../../config";
 
 const intervalTimes = [2, 5, 10, 15, 30, 60];
+
+const timeZones = [
+  ["GMT -3:00 Brasilia", -10800],
+  ["GMT -4:00 - Caracas", -14400],
+  ["GMT -5:00 - Bogotá", -18000],
+];
 
 const baseStyle =
   "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
-const BASE_API_URL = "http://localhost:3000/";
-
 const fetchConfig = async () => {
-  const res = await fetch(BASE_API_URL + "config");
+  const res = await fetch(BASE_URL + "config?seccion=datos");
   return await res.json();
 };
 
-const saveConfig = (data) => {
+const saveConfig = async (data) => {
   console.log(data);
+  let formData = new FormData();
+  Object.keys(data).forEach((k) => {
+    formData.append(k, data[k]);
+  });
+  formData.append("seccion", "datos");
+  console.log(formData);
+
+  return await fetch(BASE_URL + "config", {
+    method: "POST",
+    body: new URLSearchParams(formData),
+  });
 };
 
 export default function DataSection({ backFn }) {
   const [formData, setFormData] = useState({
-    interval: "5",
+    p_muestreo: "5",
+    z_horaria: "-14400",
   });
 
-  const { interval } = formData;
+  const { p_muestreo, z_horaria } = formData;
+
+  useEffect(async () => {
+    try {
+      setFormData(await fetchConfig());
+    } catch (error) {
+      console.log("Error al cargar configuración");
+    }
+  }, []);
 
   const updateForm = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const onSubmit = () => {
-    saveConfig(formData);
+  const onSubmit = async () => {
+    let res = await saveConfig(formData);
+    console.log(res);
   };
 
   return (
@@ -53,20 +79,41 @@ export default function DataSection({ backFn }) {
       >
         <div className="mb-5">
           <label
-            for="interval"
+            for="p_muestreo"
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            Frecuencia de muestreo
+            Período de muestreo
           </label>
           <select
-            id="interval"
-            value={interval}
-            name="interval"
+            id="p_muestreo"
+            value={p_muestreo}
+            name="p_muestreo"
             onChange={updateForm}
             class={baseStyle}
           >
             {intervalTimes.map((t) => (
               <option key={t} value={t.toString()}>{`${t} minutos`}</option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-5">
+          <label
+            for="z_horaria"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Zona horaria
+          </label>
+          <select
+            id="z_horaria"
+            value={z_horaria}
+            name="z_horaria"
+            onChange={updateForm}
+            class={baseStyle}
+          >
+            {timeZones.map((t, i) => (
+              <option key={i} value={t[1]}>
+                {t[0]}
+              </option>
             ))}
           </select>
         </div>

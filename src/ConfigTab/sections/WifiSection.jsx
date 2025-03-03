@@ -1,5 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
+import { BASE_URL } from "../../config";
 
 const ipRegex = /^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/;
 
@@ -8,15 +9,24 @@ const errorStyle =
 const baseStyle =
   "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
-const BASE_API_URL = "http://localhost:3000/";
-
 const fetchConfig = async () => {
-  const res = await fetch(BASE_API_URL + "config");
+  const res = await fetch(BASE_URL + "config?seccion=red");
   return await res.json();
 };
 
-const saveConfig = (data) => {
+const saveConfig = async (data) => {
   console.log(data);
+  let formData = new FormData();
+  Object.keys(data).forEach((k) => {
+    formData.append(k, data[k]);
+  });
+  formData.append("seccion", "red");
+  console.log(formData);
+
+  return await fetch(BASE_URL + "config", {
+    method: "POST",
+    body: new URLSearchParams(formData),
+  });
 };
 
 export default function WifiSection({ backFn }) {
@@ -50,7 +60,7 @@ export default function WifiSection({ backFn }) {
     setFormData({ ...formData, [name]: value });
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     let validation = {
       ssid: false,
@@ -76,7 +86,8 @@ export default function WifiSection({ backFn }) {
         validation.gateway
       )
     ) {
-      saveConfig(formData);
+      let res = await saveConfig(formData);
+      console.log(res);
       return 0;
     }
     setErrors(validation);

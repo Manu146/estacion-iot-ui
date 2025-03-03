@@ -11,7 +11,7 @@ const variablesText = {
   direccion: { text: "variable", unit: "°" },
 };
 
-export default function AlarmCriticalCard({ notification, dismissFn }) {
+export default function NotificationCriticalCard({ notification, dismissFn }) {
   return (
     <div className="w-full flex gap-2 items-start rounded-lg border border-red-600 text-red-600 p-4 mt-4">
       <div className="mt-1">

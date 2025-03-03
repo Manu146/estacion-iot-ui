@@ -21,7 +21,7 @@ export default function CreateAlarm({ variables, addAlarm }) {
     variable: "",
   });
   const [error, setError] = useState({
-    high: false,
+    alto: false,
     bajo: false,
     variable: false,
   });
@@ -92,7 +92,7 @@ export default function CreateAlarm({ variables, addAlarm }) {
             }
             type="number"
             id="high-new"
-            class={error.high ? errorStyle : baseStyle}
+            class={error.alto ? errorStyle : baseStyle}
             placeholder="Ingrese valor"
             required
             step="any"

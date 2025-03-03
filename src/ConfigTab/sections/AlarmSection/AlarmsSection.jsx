@@ -1,7 +1,8 @@
-import { useState } from "preact/hooks";
-import { Plus, MoveLeft } from "lucide-preact";
+import { useState, useEffect } from "preact/hooks";
+import { MoveLeft } from "lucide-preact";
 import AlarmCard from "./AlarmCard";
 import CreateAlarm from "./CreateAlarm";
+import { BASE_URL } from "../../../config";
 
 //const variables = ["Temperatura", "Humedad", "Presión"];
 const variables = [
@@ -13,13 +14,45 @@ const variables = [
   "direccion",
 ];
 
-const onSubmit = (params) => {};
+const fetchConfig = async () => {
+  const res = await fetch(BASE_URL + "config?seccion=alarmas");
+  return await res.json();
+};
 
-export default function AlarmsSection({ config, backFn }) {
-  const [alarms, setAlarms] = useState({
-    temperatura: { bajo: 10, alto: 30 },
-    presion: { bajo: 10, alto: 30 },
+const saveConfig = async (data) => {
+  console.log(data);
+  let formData = new FormData();
+  Object.keys(data).forEach((k) => {
+    formData.append(`${k}_bajo`, data[k].bajo);
+    formData.append(`${k}_alto`, data[k].alto);
   });
+  formData.append("seccion", "alarmas");
+  console.log(formData);
+
+  return await fetch(BASE_URL + "config", {
+    method: "POST",
+    body: new URLSearchParams(formData),
+  });
+};
+
+export default function AlarmsSection({ backFn }) {
+  const [alarms, setAlarms] = useState({});
+
+  useEffect(async () => {
+    try {
+      setAlarms(await fetchConfig());
+    } catch (error) {
+      console.log("Error al cargar configuración");
+    }
+  }, []);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    let res = await saveConfig(alarms);
+    console.log(res);
+    return 0;
+  };
+
   const updateAlarm = (variable, thresholds) => {
     setAlarms({ ...alarms, [variable]: thresholds });
   };

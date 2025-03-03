@@ -1,23 +1,73 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
+import { BASE_URL } from "../../config";
 
 const errorStyle =
   "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full p-2.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500";
 const baseStyle =
   "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
+const fetchConfig = async () => {
+  const res = await fetch(BASE_URL + "config?seccion=servidor");
+  return await res.json();
+};
+
+const saveConfig = async (data) => {
+  console.log(data);
+  let formData = new FormData();
+  Object.keys(data).forEach((k) => {
+    formData.append(k, data[k]);
+  });
+  formData.append("seccion", "servidor");
+  console.log(formData);
+
+  return await fetch(BASE_URL + "config", {
+    method: "POST",
+    body: new URLSearchParams(formData),
+  });
+};
+
 export default function ExternalServerSection({ backFn }) {
-  const [formData, setFormData] = useState({ url: "", port: "" });
-  const [errors, setErrors] = useState({ url: false, port: false });
+  const [formData, setFormData] = useState({ url: "", puerto: "" });
+  const [errors, setErrors] = useState({ url: false, puerto: false });
+
+  const { url, puerto } = formData;
+
+  useEffect(async () => {
+    try {
+      setFormData(await fetchConfig());
+    } catch (error) {
+      console.log("Error al cargar configuración");
+    }
+  }, []);
+
   const updateForm = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const onSubmit = (e) => {
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    console.log("asd");
+    let validation = {
+      url: false,
+      puerto: false,
+    };
+
+    if (url === "") validation = { ...validation, url: true };
+    if (puerto === "") validation = { ...validation, puerto: true };
+
+    if (!(validation.url || validation.puerto)) {
+      setErrors({
+        url: false,
+        puerto: false,
+      });
+      let res = await saveConfig(formData);
+      console.log(res);
+      return 0;
+    }
+    setErrors(validation);
   };
-  const { url, port } = formData;
+
   return (
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="border-b border-gray-200 dark:border-gray-700 p-6">
@@ -70,13 +120,13 @@ export default function ExternalServerSection({ backFn }) {
               Puerto
             </label>
             <input
-              type="text"
-              id="port"
-              class={`${errors.port ? errorStyle : baseStyle} w-full md:w-24`}
+              type="number"
+              id="puerto"
+              class={`${errors.puerto ? errorStyle : baseStyle} w-full md:w-24`}
               required
-              name="port"
+              name="puerto"
               onInput={updateForm}
-              value={port}
+              value={puerto}
             />
             {errors.port && (
               <p class="mt-2 text-sm text-red-600 dark:text-red-500">
