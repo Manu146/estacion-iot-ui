@@ -223,6 +223,8 @@ const variables = [
   { text: "Presión", value: "presion" },
   { text: "Humedad", value: "humedad" },
   { text: "Solar", value: "solar" },
+  { text: "Velocidad del viento", value: "velocidad" },
+  { text: "Pluviosidad", value: "pluviosidad" },
 ];
 
 export default function Chart() {
