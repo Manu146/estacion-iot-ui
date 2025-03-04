@@ -137,7 +137,7 @@ const fetchDayData = async (selectedDate, variable) => {
   const { year, month, day } = selectedDate;
   const res = await fetch(
     `${BASE_URL}datos?inicio=${
-      new Date(Date.UTC(year, month - 1, day)).valueOf() / 1000
+      new Date(year, month - 1, day).valueOf() / 1000
     }&variable=${variable}&frecuencia=diario`
   );
   return await res.json();
@@ -145,8 +145,8 @@ const fetchDayData = async (selectedDate, variable) => {
 
 const fetchDayAvgs = async (selectedDate, variable) => {
   const { year, month } = selectedDate;
-  let start = new Date(Date.UTC(year, month - 1, 1)).valueOf() / 1000;
-  let end = new Date(Date.UTC(year, month, 1)).valueOf() / 1000;
+  let start = new Date(year, month - 1, 1).valueOf() / 1000;
+  let end = new Date(year, month, 1).valueOf() / 1000;
 
   let res = await fetch(
     `${BASE_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=mensual`
@@ -156,8 +156,8 @@ const fetchDayAvgs = async (selectedDate, variable) => {
 
 const fetchMonthAvgs = async (selectedDate, variable) => {
   const { year } = selectedDate;
-  let start = new Date(Date.UTC(year, 0, 1)).valueOf() / 1000;
-  let end = new Date(Date.UTC(year + 1, 0, 1)).valueOf() / 1000;
+  let start = new Date(year, 0, 1).valueOf() / 1000;
+  let end = new Date(year + 1, 0, 1).valueOf() / 1000;
 
   let res = await fetch(
     `${BASE_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=anual`
@@ -182,10 +182,10 @@ const formatData = (data, frequency) => {
     const dataPoints = data.map(({ t, valor }) => valor);
     const labels = data.map(({ t, valor }) => {
       const d = new Date(t * 1000);
-      return `${d.getUTCHours().toLocaleString("en-US", {
+      return `${d.getHours().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
         useGrouping: false,
-      })}:${d.getUTCMinutes().toLocaleString("en-US", {
+      })}:${d.getMinutes().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
         useGrouping: false,
       })}`;
@@ -197,10 +197,10 @@ const formatData = (data, frequency) => {
     const dataPoints = data.map(({ t, valor }) => valor);
     const labels = data.map(({ t, valor }) => {
       const d = new Date(t * 1000);
-      return `${d.getUTCDate().toLocaleString("en-US", {
+      return `${d.getDate().toLocaleString("en-US", {
         minimumIntegerDigits: 2,
         useGrouping: false,
-      })}-${(d.getUTCMonth() + 1).toLocaleString("en-US", {
+      })}-${(d.getMonth() + 1).toLocaleString("en-US", {
         minimumIntegerDigits: 2,
         useGrouping: false,
       })}`;
@@ -210,7 +210,7 @@ const formatData = (data, frequency) => {
   const dataPoints = data.map(({ t, valor }) => valor);
   const labels = data.map(({ t, valor }) => {
     const d = new Date(t * 1000);
-    return `${(d.getUTCMonth() + 1).toLocaleString("en-US", {
+    return `${(d.getMonth() + 1).toLocaleString("en-US", {
       minimumIntegerDigits: 2,
       useGrouping: false,
     })}-${d.getUTCFullYear()}`;
@@ -279,8 +279,6 @@ export default function Chart() {
         );
     } catch (e) {}
   }, [frequency, selectedDate, variable]);
-
-  //console.log(chartData);
 
   if (availableDays)
     return (
