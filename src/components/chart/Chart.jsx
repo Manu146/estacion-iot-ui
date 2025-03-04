@@ -1,8 +1,7 @@
 import LineChart from "./LineChart";
 import Calendar from "./Calendar";
 import { useState, useMemo, useEffect } from "preact/hooks";
-
-const BASE_API_URL = "http://localhost:3000/";
+import { BASE_URL } from "../../config";
 
 function generateTemperatureData() {
   // Start time: July 10, 2024 00:00:00 UTC
@@ -135,56 +134,40 @@ function parseFrequency(frequency) {
 }
 
 const fetchDayData = async (selectedDate, variable) => {
-  console.log("day");
   const { year, month, day } = selectedDate;
-  /*return generateWeatherData(
-    variable,
-    "daily/5",
-    new Date(Date.UTC(year, month + 1, day))
-  );*/
   const res = await fetch(
-    `${BASE_API_URL}datos?inicio=${
-      new Date(Date.UTC(year, month + 1, day)).valueOf() / 1000
+    `${BASE_URL}datos?inicio=${
+      new Date(Date.UTC(year, month - 1, day)).valueOf() / 1000
     }&variable=${variable}&frecuencia=diario`
   );
   return await res.json();
 };
 
 const fetchDayAvgs = async (selectedDate, variable) => {
-  console.log("month");
   const { year, month } = selectedDate;
-  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf() / 1000;
-  let end = new Date(Date.UTC(year, month + 2, 1)).valueOf() / 1000;
-  /*return generateWeatherData(
-    variable,
-    "monthly",
-    new Date(Date.UTC(year, month + 1, 1))
-  );*/
+  let start = new Date(Date.UTC(year, month - 1, 1)).valueOf() / 1000;
+  let end = new Date(Date.UTC(year, month, 1)).valueOf() / 1000;
+
   let res = await fetch(
-    `${BASE_API_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencio=mensual`
+    `${BASE_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=mensual`
   );
   return await res.json();
 };
 
 const fetchMonthAvgs = async (selectedDate, variable) => {
-  console.log("year");
   const { year } = selectedDate;
-  let start = new Date(Date.UTC(year, month + 1, 1)).valueOf() / 1000;
-  let end = new Date(Date.UTC(year + 1, month + 1, 1)).valueOf() / 1000;
-  /*return generateWeatherData(
-    variable,
-    "monthly",
-    new Date(Date.UTC(year, month + 1, 1))
-  );*/
+  let start = new Date(Date.UTC(year, 0, 1)).valueOf() / 1000;
+  let end = new Date(Date.UTC(year + 1, 0, 1)).valueOf() / 1000;
+
   let res = await fetch(
-    `${BASE_API_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=anual`
+    `${BASE_URL}datos?inicio=${start}&final=${end}&variable=${variable}&frecuencia=anual`
   );
   return await res.json();
 };
 
 const fetchAvailableDates = async () => {
   try {
-    const response = await fetch(`${BASE_API_URL}fechas`);
+    const response = await fetch(`${BASE_URL}fechas`);
     const data = await response.json();
     return data;
   } catch (error) {
