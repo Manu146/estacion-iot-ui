@@ -326,7 +326,10 @@ export default function Chart() {
         </div>
         {chartData && (
           <div className="mt-8">
-            <LineChart formattedData={chartData} />
+            <LineChart
+              formattedData={chartData}
+              variable={variables.filter((v) => variable === v.value)[0].text}
+            />
           </div>
         )}
       </div>

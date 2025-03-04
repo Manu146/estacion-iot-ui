@@ -21,13 +21,13 @@ ChartJS.register(
   Legend
 );
 
-export default function LineChart({ formattedData }) {
+export default function LineChart({ formattedData, variable }) {
   const { dataPoints, labels } = formattedData;
   const data = {
     labels,
     datasets: [
       {
-        label: "Temp",
+        label: variable,
         data: dataPoints,
         borderColor: "#7bf1a8",
         backgroundColor: "#0c4d2b",
