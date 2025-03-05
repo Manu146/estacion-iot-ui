@@ -1,6 +1,20 @@
 import { MoveLeft } from "lucide-preact";
 
-export default function ResetSection({ backFn }) {
+const saveConfig = async (token) => {
+  if (!token) return;
+  let formData = new FormData();
+  formData.append("seccion", "reset");
+
+  return await fetch(BASE_URL + "config", {
+    method: "POST",
+    body: new URLSearchParams(formData),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export default function ResetSection({ backFn, token }) {
   return (
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="flex items-start border-b border-gray-200 dark:border-gray-700 p-6">
@@ -22,6 +36,10 @@ export default function ResetSection({ backFn }) {
       </div>
       <div className="flex justify-center p-6">
         <button
+          onClick={async (e) => {
+            e.preventDefault();
+            await saveConfig(token);
+          }}
           type="button"
           class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
         >

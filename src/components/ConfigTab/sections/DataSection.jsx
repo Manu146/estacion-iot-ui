@@ -18,8 +18,8 @@ const fetchConfig = async () => {
   return await res.json();
 };
 
-const saveConfig = async (data) => {
-  console.log(data);
+const saveConfig = async (data, token) => {
+  if (!token) return;
   let formData = new FormData();
   Object.keys(data).forEach((k) => {
     formData.append(k, data[k]);
@@ -30,10 +30,13 @@ const saveConfig = async (data) => {
   return await fetch(BASE_URL + "config", {
     method: "POST",
     body: new URLSearchParams(formData),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
-export default function DataSection({ backFn }) {
+export default function DataSection({ backFn, token }) {
   const [formData, setFormData] = useState({
     p_muestreo: "5",
     z_horaria: "-14400",
@@ -55,7 +58,7 @@ export default function DataSection({ backFn }) {
   };
 
   const onSubmit = async () => {
-    let res = await saveConfig(formData);
+    let res = await saveConfig(formData, token);
     console.log(res);
   };
 

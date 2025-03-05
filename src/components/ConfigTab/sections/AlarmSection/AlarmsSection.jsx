@@ -19,8 +19,8 @@ const fetchConfig = async () => {
   return await res.json();
 };
 
-const saveConfig = async (data) => {
-  console.log(data);
+const saveConfig = async (data, token) => {
+  if (!token) return;
   let formData = new FormData();
   Object.keys(data).forEach((k) => {
     formData.append(`${k}_bajo`, data[k].bajo);
@@ -32,6 +32,9 @@ const saveConfig = async (data) => {
   return await fetch(BASE_URL + "config", {
     method: "POST",
     body: new URLSearchParams(formData),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
@@ -48,8 +51,7 @@ export default function AlarmsSection({ backFn }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    let res = await saveConfig(alarms);
-    console.log(res);
+    let res = await saveConfig(alarms, token);
     return 0;
   };
 

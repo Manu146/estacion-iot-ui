@@ -58,6 +58,8 @@ const configCards = {
   },
 };
 
+//TODO implementar si el token es invalido (recibo 401 en los fetch de algun config), setear token null y volver atras
+
 export default function ConfigTab({ backFn }) {
   const [configView, setConfigView] = useState("");
   const [token, setToken] = useState(null);
@@ -96,7 +98,7 @@ export default function ConfigTab({ backFn }) {
       />
       <>
         {configView ? (
-          <ViewComponent backFn={() => setConfigView(null)} />
+          <ViewComponent backFn={() => setConfigView(null)} token={token} />
         ) : (
           <div className="">
             <h2 class="text-2xl font-semibold text-gray-950 dark:text-gray-50 mb-2">
