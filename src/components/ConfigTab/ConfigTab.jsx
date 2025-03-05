@@ -58,14 +58,12 @@ const configCards = {
   },
 };
 
-//TODO Autenticacion
-//TODO Agregar seccion autenticacion (modificar contraseña de admin)
-
 export default function ConfigTab({ backFn }) {
   const [configView, setConfigView] = useState("");
   const [token, setToken] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const ViewComponent = configView ? viewComponets[configView] : null;
+
   const factoryReset = () => {
     console.log("Reset de fábrica");
   };
@@ -73,7 +71,7 @@ export default function ConfigTab({ backFn }) {
   useEffect(() => {
     if (!token) setIsOpen(true);
     else setIsOpen(false);
-  }, []);
+  }, [token]);
 
   const closeModal = () => {
     setIsOpen(false);
@@ -84,10 +82,6 @@ export default function ConfigTab({ backFn }) {
     backFn();
   };
 
-  const loginFn = (password) => {
-    closeModal;
-  };
-
   const handleViewChange = (e) => {
     setConfigView(e.target.name);
   };
@@ -95,17 +89,14 @@ export default function ConfigTab({ backFn }) {
   return (
     <div className="mt-6">
       <LoginModal
-        isOpen={false}
+        isOpen={isOpen}
+        setToken={setToken}
         closeModal={closeModal}
-        loginFn={loginFn}
         closeModalBack={closeModalBack}
       />
       <>
         {configView ? (
-          <ViewComponent
-            backFn={() => setConfigView(null)}
-            config={{ alarmas: [] }}
-          />
+          <ViewComponent backFn={() => setConfigView(null)} />
         ) : (
           <div className="">
             <h2 class="text-2xl font-semibold text-gray-950 dark:text-gray-50 mb-2">

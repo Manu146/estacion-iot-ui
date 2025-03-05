@@ -1,14 +1,48 @@
 import { useState } from "preact/hooks";
 import { Lock, X } from "lucide-preact";
 import Modal from "react-modal";
+import { BASE_URL } from "../../config";
+
+const errorStyle =
+  "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full p-2.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500";
+const baseStyle =
+  "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
 export default function LoginModal({
   isOpen,
-  loginFn,
+  setToken,
   closeModal,
   closeModalBack,
 }) {
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const loginFn = async (password) => {
+    let formData = new FormData();
+    formData.append("admin_pass", password);
+    let res = await fetch(`${BASE_URL}autenticar`, {
+      method: "POST",
+      body: new URLSearchParams(formData),
+    });
+
+    if (res.status === 401) {
+      setError("Contraseña incorrecta. Inténtelo de nuevo.");
+      return;
+    }
+
+    if (res.status === 200) {
+      let data = await res.json();
+      if (data.token) {
+        setToken(data.token);
+        closeModal();
+      } else {
+        setError("Contraseña incorrecta. Inténtelo de nuevo.");
+      }
+    } else {
+      setError("Error al autenticar. Inténtelo de nuevo.");
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -32,10 +66,13 @@ export default function LoginModal({
       </p>
       <form
         className="py-4"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          loginFn(password);
-          closeModal();
+          if (password === "") {
+            setError("Ingrese la contraseña");
+            return;
+          }
+          await loginFn(password);
         }}
       >
         <div class="mt-6">
@@ -50,10 +87,14 @@ export default function LoginModal({
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class={error ? errorStyle : baseStyle}
             placeholder="Contraseña de administrador"
-            required
           />
+          {error && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+              {error}
+            </p>
+          )}
         </div>
         <div className="flex justify-between mt-4">
           <button
@@ -64,12 +105,7 @@ export default function LoginModal({
             Cancelar
           </button>
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              loginFn(password);
-              closeModal();
-            }}
-            type="button"
+            type="submit"
             class="font-semibold focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
           >
             Acceder
