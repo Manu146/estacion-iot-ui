@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -21,7 +21,6 @@ const saveConfig = async (data, token) => {
     formData.append(k, data[k]);
   });
   formData.append("seccion", "red");
-  console.log(formData);
 
   return await fetch(BASE_URL + "config", {
     method: "POST",
@@ -32,7 +31,7 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function WifiSection({ backFn, token }) {
+export default function WifiSection({ backFn, token, returnToLogin }) {
   const [formData, setFormData] = useState({
     mode: "1",
     ssid: "",
@@ -46,7 +45,11 @@ export default function WifiSection({ backFn, token }) {
     pass: false,
     ip: false,
     gateway: false,
+    fetch: false,
   });
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  const timeoutRef = useRef(null);
 
   const { ssid, pass, ip, gateway, mode } = formData;
 
@@ -64,35 +67,80 @@ export default function WifiSection({ backFn, token }) {
   };
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    let validation = {
-      ssid: false,
-      pass: false,
-      ip: false,
-      gateway: false,
-    };
+    try {
+      e.preventDefault();
+      let validation = {
+        ssid: false,
+        pass: false,
+        ip: false,
+        gateway: false,
+        fetch: false,
+      };
 
-    if (ssid === "") validation = { ...validation, ssid: true };
-    if (pass === "" && !noPw) validation = { ...validation, pass: true };
-    if (mode === "1") {
-      if (ip === "" || !ipRegex.test(ip))
-        validation = { ...validation, ip: true };
-      if (gateway === "" || !ipRegex.test(gateway))
-        validation = { ...validation, gateway: true };
-    }
+      if (ssid === "") validation = { ...validation, ssid: true };
+      if (pass === "" && !noPw) validation = { ...validation, pass: true };
+      if (mode === "1") {
+        if (ip === "" || !ipRegex.test(ip))
+          validation = { ...validation, ip: true };
+        if (gateway === "" || !ipRegex.test(gateway))
+          validation = { ...validation, gateway: true };
+      }
 
-    if (
-      !(
-        validation.ssid ||
-        validation.pass ||
-        validation.ip ||
-        validation.gateway
-      )
-    ) {
-      let res = await saveConfig(formData, token);
-      return 0;
+      if (
+        !(
+          validation.ssid ||
+          validation.pass ||
+          validation.ip ||
+          validation.gateway
+        )
+      ) {
+        setErrors({
+          ssid: false,
+          pass: false,
+          ip: false,
+          gateway: false,
+          fetch: false,
+        });
+        let res = await saveConfig(formData, token);
+        if (res.status === 401) {
+          setMessage({
+            text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+            type: "error",
+          });
+          if (timeoutRef.current === null) {
+            timeoutRef.current = setTimeout(() => {
+              setMessage({ text: "", type: "" });
+              returnToLogin();
+            }, 2000);
+          } else {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+              setMessage({ text: "", type: "" });
+              returnToLogin();
+            }, 2000);
+          }
+          return;
+        }
+        if (res.status === 200) {
+          setMessage({
+            text: "Cambios guardados exitosamente.",
+            type: "success",
+          });
+        } else {
+          setMessage({
+            text: "Error al guardar los cambios. Inténtelo de nuevo.",
+            type: "error",
+          });
+        }
+      }
+      setErrors(validation);
+    } catch (error) {
+      console.log(error);
+      setMessage({
+        text: "Error al guardar los cambios. Inténtelo de nuevo.",
+        type: "error",
+      });
     }
-    setErrors(validation);
   };
 
   return (
@@ -237,6 +285,17 @@ export default function WifiSection({ backFn, token }) {
               )}
             </div>
           </>
+        )}
+        {message.text && (
+          <p
+            className={`text-sm text-center mb-4 ${
+              message.type === "success"
+                ? "text-green-600 dark:text-green-500"
+                : "text-red-600 dark:text-red-500"
+            }`}
+          >
+            {message.text}
+          </p>
         )}
         <div className="flex justify-end">
           <button

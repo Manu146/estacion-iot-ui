@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -25,7 +25,6 @@ const saveConfig = async (data, token) => {
     formData.append(k, data[k]);
   });
   formData.append("seccion", "datos");
-  console.log(formData);
 
   return await fetch(BASE_URL + "config", {
     method: "POST",
@@ -36,11 +35,13 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function DataSection({ backFn, token }) {
+export default function DataSection({ backFn, token, returnToLogin }) {
   const [formData, setFormData] = useState({
     p_muestreo: "5",
     z_horaria: "-14400",
   });
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const timeoutRef = useRef(null);
 
   const { p_muestreo, z_horaria } = formData;
 
@@ -52,14 +53,38 @@ export default function DataSection({ backFn, token }) {
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const updateForm = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
     let res = await saveConfig(formData, token);
-    console.log(res);
+    if (res.status === 200) {
+      setMessage({ text: "Cambios guardados exitosamente.", type: "success" });
+    } else if (res.status === 401) {
+      setMessage({
+        text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+        type: "error",
+      });
+      timeoutRef.current = setTimeout(() => {
+        returnToLogin();
+      }, 2000);
+    } else {
+      setMessage({
+        text: "Error al guardar los cambios. Inténtelo de nuevo.",
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -77,7 +102,7 @@ export default function DataSection({ backFn, token }) {
         class="p-6"
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
+          onSubmit(e);
         }}
       >
         <div className="mb-5">
@@ -120,6 +145,17 @@ export default function DataSection({ backFn, token }) {
             ))}
           </select>
         </div>
+        {message.text && (
+          <p
+            className={`text-sm text-center mb-4 ${
+              message.type === "success"
+                ? "text-green-600 dark:text-green-500"
+                : "text-red-600 dark:text-red-500"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
         <div className="flex justify-end">
           <button
             onClick={onSubmit}

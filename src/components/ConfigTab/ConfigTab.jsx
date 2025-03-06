@@ -66,8 +66,9 @@ export default function ConfigTab({ backFn }) {
   const [isOpen, setIsOpen] = useState(false);
   const ViewComponent = configView ? viewComponets[configView] : null;
 
-  const factoryReset = () => {
-    console.log("Reset de fábrica");
+  const returnToLogin = () => {
+    console.log("No token");
+    setToken(null);
   };
 
   useEffect(() => {
@@ -98,7 +99,11 @@ export default function ConfigTab({ backFn }) {
       />
       <>
         {configView ? (
-          <ViewComponent backFn={() => setConfigView(null)} token={token} />
+          <ViewComponent
+            backFn={() => setConfigView(null)}
+            token={token}
+            returnToLogin={returnToLogin}
+          />
         ) : (
           <div className="">
             <h2 class="text-2xl font-semibold text-gray-950 dark:text-gray-50 mb-2">

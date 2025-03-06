@@ -1,10 +1,9 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import AlarmCard from "./AlarmCard";
 import CreateAlarm from "./CreateAlarm";
 import { BASE_URL } from "../../../../config";
 
-//const variables = ["Temperatura", "Humedad", "Presión"];
 const variables = [
   "temperatura",
   "presion",
@@ -38,8 +37,10 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function AlarmsSection({ backFn }) {
+export default function AlarmsSection({ backFn, returnToLogin, token }) {
   const [alarms, setAlarms] = useState({});
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const timeoutRef = useRef(null);
 
   useEffect(async () => {
     try {
@@ -49,10 +50,33 @@ export default function AlarmsSection({ backFn }) {
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     let res = await saveConfig(alarms, token);
-    return 0;
+    if (res.status === 200) {
+      setMessage({ text: "Cambios guardados exitosamente.", type: "success" });
+    } else if (res.status === 401) {
+      setMessage({
+        text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+        type: "error",
+      });
+      timeoutRef.current = setTimeout(() => {
+        returnToLogin();
+      }, 2000);
+    } else {
+      setMessage({
+        text: "Error al guardar los cambios. Inténtelo de nuevo.",
+        type: "error",
+      });
+    }
   };
 
   const updateAlarm = (variable, thresholds) => {
@@ -100,12 +124,24 @@ export default function AlarmsSection({ backFn }) {
             </h3>
             {Object.keys(alarms).map((alarm) => (
               <AlarmCard
+                key={alarm}
                 alarm={{ variable: alarm, ...alarms[alarm] }}
                 updateAlarm={updateAlarm}
                 deleteAlarm={deleteAlarm}
               />
             ))}
           </div>
+          {message.text && (
+            <p
+              className={`text-sm text-center mb-4 ${
+                message.type === "success"
+                  ? "text-green-600 dark:text-green-500"
+                  : "text-red-600 dark:text-red-500"
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
           <div className="flex justify-end">
             <button
               onClick={onSubmit}

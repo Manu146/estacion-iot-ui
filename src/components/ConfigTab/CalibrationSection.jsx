@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../config";
 
@@ -12,28 +12,35 @@ const fetchConfig = async () => {
   return await res.json();
 };
 
-const saveConfig = async (data) => {
-  console.log(data);
+const saveConfig = async (data, token) => {
+  if (!token) return;
   let formData = new FormData();
   Object.keys(data).forEach((k) => {
     formData.append(k, data[k]);
   });
   formData.append("seccion", "calibracion");
-  console.log(formData);
 
   return await fetch(BASE_URL + "config", {
     method: "POST",
     body: new URLSearchParams(formData),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
-export default function CalibrationSection({ backFn }) {
+export default function CalibrationSection({ backFn, token, returnToLogin }) {
   const [formData, setFormData] = useState({
     solar: "",
     anemometro: "",
     pluviometro: "",
   });
-  const [errors, setErrors] = useState({ solar: false });
+  const [errors, setErrors] = useState({
+    solar: false,
+    anemometro: false,
+    pluviometro: false,
+  });
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   const { solar, anemometro, pluviometro } = formData;
 
@@ -69,8 +76,26 @@ export default function CalibrationSection({ backFn }) {
         anemometro: false,
         pluviometro: false,
       });
-      let res = await saveConfig(formData);
-      console.log(res);
+      let res = await saveConfig(formData, token);
+      if (res.status === 200) {
+        setMessage({
+          text: "Cambios guardados exitosamente.",
+          type: "success",
+        });
+      } else if (res.status === 401) {
+        setMessage({
+          text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+          type: "error",
+        });
+        setTimeout(() => {
+          returnToLogin();
+        }, 2000);
+      } else {
+        setMessage({
+          text: "Error al guardar los cambios. Inténtelo de nuevo.",
+          type: "error",
+        });
+      }
       return 0;
     }
     setErrors(validation);
@@ -93,7 +118,7 @@ export default function CalibrationSection({ backFn }) {
             for="solar"
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            Radiación solar??
+            Radiación solar
           </label>
           <input
             type="number"
@@ -154,6 +179,17 @@ export default function CalibrationSection({ backFn }) {
             </p>
           )}
         </div>
+        {message.text && (
+          <p
+            className={`text-sm text-center mb-4 ${
+              message.type === "success"
+                ? "text-green-600 dark:text-green-500"
+                : "text-red-600 dark:text-red-500"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
         <div className="flex justify-end">
           <button
             onClick={onSubmit}

@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { Lock, X } from "lucide-preact";
 import Modal from "react-modal";
 import { BASE_URL } from "../../config";
@@ -42,6 +42,10 @@ export default function LoginModal({
       setError("Error al autenticar. Inténtelo de nuevo.");
     }
   };
+
+  useEffect(() => {
+    setPassword("");
+  }, [isOpen]);
 
   return (
     <Modal

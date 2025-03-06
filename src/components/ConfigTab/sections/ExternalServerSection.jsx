@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useRef } from "preact/hooks";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -30,9 +30,15 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function ExternalServerSection({ backFn, token }) {
+export default function ExternalServerSection({
+  backFn,
+  token,
+  returnToLogin,
+}) {
   const [formData, setFormData] = useState({ url: "", puerto: "" });
   const [errors, setErrors] = useState({ url: false, puerto: false });
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const timeoutRef = useRef(null);
 
   const { url, puerto } = formData;
 
@@ -42,6 +48,14 @@ export default function ExternalServerSection({ backFn, token }) {
     } catch (error) {
       console.log("Error al cargar configuración");
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   const updateForm = (e) => {
@@ -65,7 +79,25 @@ export default function ExternalServerSection({ backFn, token }) {
         puerto: false,
       });
       let res = await saveConfig(formData, token);
-      console.log(res);
+      if (res.status === 200) {
+        setMessage({
+          text: "Cambios guardados exitosamente.",
+          type: "success",
+        });
+      } else if (res.status === 401) {
+        setMessage({
+          text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+          type: "error",
+        });
+        timeoutRef.current = setTimeout(() => {
+          returnToLogin();
+        }, 2000);
+      } else {
+        setMessage({
+          text: "Error al guardar los cambios. Inténtelo de nuevo.",
+          type: "error",
+        });
+      }
       return 0;
     }
     setErrors(validation);
@@ -138,6 +170,17 @@ export default function ExternalServerSection({ backFn, token }) {
             )}
           </div>
         </div>
+        {message.text && (
+          <p
+            className={`text-sm text-center mb-4 ${
+              message.type === "success"
+                ? "text-green-600 dark:text-green-500"
+                : "text-red-600 dark:text-red-500"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
         <div className="flex justify-end">
           <button
             onClick={onSubmit}
