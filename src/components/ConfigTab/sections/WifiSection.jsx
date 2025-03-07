@@ -9,8 +9,12 @@ const errorStyle =
 const baseStyle =
   "bg-gray-50 border border-gray-300 dark:border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500";
 
-const fetchConfig = async () => {
-  const res = await fetch(BASE_URL + "config?seccion=red");
+const fetchConfig = async (token) => {
+  const res = await fetch(BASE_URL + "config?seccion=red", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return await res.json();
 };
 
@@ -55,7 +59,7 @@ export default function WifiSection({ backFn, token, returnToLogin }) {
 
   useEffect(async () => {
     try {
-      setFormData(await fetchConfig());
+      setFormData(await fetchConfig(token));
     } catch (error) {
       console.log("Error al cargar configuración");
     }

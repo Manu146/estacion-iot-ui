@@ -13,8 +13,12 @@ const variables = [
   "direccion",
 ];
 
-const fetchConfig = async () => {
-  const res = await fetch(BASE_URL + "config?seccion=alarmas");
+const fetchConfig = async (token) => {
+  const res = await fetch(BASE_URL + "config?seccion=alarmas", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return await res.json();
 };
 
@@ -44,7 +48,7 @@ export default function AlarmsSection({ backFn, returnToLogin, token }) {
 
   useEffect(async () => {
     try {
-      setAlarms(await fetchConfig());
+      setAlarms(await fetchConfig(token));
     } catch (error) {
       console.log("Error al cargar configuración");
     }
