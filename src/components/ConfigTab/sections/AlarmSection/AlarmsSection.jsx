@@ -25,9 +25,9 @@ const fetchConfig = async (token) => {
 const saveConfig = async (data, token) => {
   if (!token) return;
   let formData = new FormData();
-  Object.keys(data).forEach((k) => {
-    formData.append(`${k}_bajo`, data[k].bajo);
-    formData.append(`${k}_alto`, data[k].alto);
+  data.forEach((k) => {
+    formData.append(`${k.variable}_bajo`, k.bajo);
+    formData.append(`${k.variable}_alto`, k.alto);
   });
   formData.append("seccion", "alarmas");
   console.log(formData);
@@ -42,7 +42,7 @@ const saveConfig = async (data, token) => {
 };
 
 export default function AlarmsSection({ backFn, returnToLogin, token }) {
-  const [alarms, setAlarms] = useState({});
+  const [alarms, setAlarms] = useState([]);
   const [message, setMessage] = useState({ text: "", type: "" });
   const timeoutRef = useRef(null);
 
@@ -84,21 +84,31 @@ export default function AlarmsSection({ backFn, returnToLogin, token }) {
   };
 
   const updateAlarm = (variable, thresholds) => {
-    setAlarms({ ...alarms, [variable]: thresholds });
+    //const index = alarms.indexOf()
+    //setAlarms({ ...alarms, [variable]: thresholds });
+    setAlarms((prev) =>
+      prev.map((a) => (a.variable === variable ? { ...a, ...thresholds } : a))
+    );
   };
 
   const addAlarm = (alarm) => {
-    const { variable, ...rest } = alarm;
-    setAlarms({ ...alarms, [variable]: { ...rest } });
+    //const { variable, ...rest } = alarm;
+    //setAlarms({ ...alarms, [variable]: { ...rest } });
+    setAlarms((prev) => [...prev, alarm]);
   };
 
   const deleteAlarm = (variable) => {
-    const { [variable]: _, ...variables } = alarms;
-    setAlarms({ ...variables });
+    //const { [variable]: _, ...variables } = alarms;
+    //setAlarms({ ...variables });
+    setAlarms((prev) => prev.filter((a) => a.variable !== variable));
   };
 
-  const filteredVariables = variables.filter(
+  /*const filteredVariables = variables.filter(
     (variable) => !Object.keys(alarms).includes(variable)
+  );*/
+
+  const filteredVariables = variables.filter(
+    (v) => !alarms.map((a) => a.variable).includes(v)
   );
 
   return (
