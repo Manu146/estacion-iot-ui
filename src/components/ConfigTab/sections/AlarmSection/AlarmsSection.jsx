@@ -10,7 +10,7 @@ const variables = [
   "humedad",
   "velocidad",
   "pluviosidad",
-  "direccion",
+  "solar",
 ];
 
 const fetchConfig = async (token) => {

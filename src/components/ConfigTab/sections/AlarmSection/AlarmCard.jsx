@@ -7,7 +7,7 @@ const variablesNombres = {
   presion: "Presión",
   velocidad: "Velocidad del viento",
   pluviosidad: "Pluviosidad",
-  direccion: "Dirección del viento",
+  solar: "Potencia panel solar",
 };
 
 export default function AlarmCard({ alarm, updateAlarm, deleteAlarm }) {
