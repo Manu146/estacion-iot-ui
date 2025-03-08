@@ -1,5 +1,4 @@
 import { useState, useEffect } from "preact/hooks";
-import { Settings, MoveLeft } from "lucide-preact";
 import Modal from "react-modal";
 import { useWebSocket, ReadyState } from "./hooks/useWs";
 import Cards from "./components/cards/Cards";
