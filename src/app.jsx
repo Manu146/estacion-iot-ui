@@ -6,6 +6,7 @@ import Cards from "./components/cards/Cards";
 import Chart from "./components/chart/Chart";
 import ConfigTab from "./components/ConfigTab/ConfigTab";
 import Notifiactions from "./components/Notifications/Notificacions";
+import AlarmsTable from "./components/AlarmsTable/AlarmsTable";
 
 Modal.setAppElement("#app");
 
@@ -15,9 +16,6 @@ const stringToday = new Date(Date.now()).toLocaleDateString("es-ES", {
   month: "long",
   day: "numeric",
 });
-
-//TODO Obtener configuracion, si falta algo, mostrar notificacion
-//TODO Probar autenticacion con servidor de prueba
 
 export function App() {
   const [view, setView] = useState("data"); //Data, Config
@@ -29,6 +27,7 @@ export function App() {
     critical: [],
     info: [],
   });
+  const [tablData, setTableData] = useState([]);
 
   const backFn = () => setView("data");
 
@@ -47,14 +46,29 @@ export function App() {
 
   useEffect(() => {
     if (lastMessage) {
-      if (lastMessage.tipo === "datos") setDisplayData(lastMessage.data);
-      if (lastMessage.tipo === "alarma") {
-        const newCritical = lastMessage.data;
+      const { tipo, data } = lastMessage;
+      if (tipo === "datos") setDisplayData(data);
+      if (tipo === "alarma") {
+        const newCritical = data;
         setNotifications((p) => ({
           ...p,
           critical: [newCritical, ...p["critical"]],
         }));
       }
+      if (tipo === "alarmas_activas") {
+        if (notifications.critical.length > 0) {
+          return setNotifications((prev) => ({ ...prev, critical: data }));
+        } else {
+          setNotifications((prev) => ({ ...prev, critical: data }));
+        }
+      }
+      if (tipo === "alarmas_historico") {
+        return setTableData(data);
+      }
+      //NOTE - INNECESARIO???
+      /*if (tipo === "alarmas_historico_act") {
+        return setTableData((prev) => [...data, ...prev]);
+      }*/
     }
   }, [lastMessage]);
 
@@ -122,6 +136,7 @@ export function App() {
           <>
             <Cards data={displayData}></Cards>
             <Chart />
+            <AlarmsTable alarms={tablData} />
           </>
         )}
         {view === "config" && <ConfigTab backFn={backFn} />}

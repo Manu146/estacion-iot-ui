@@ -21,7 +21,7 @@ export default function NotificationCriticalCard({ notification, dismissFn }) {
         <h5 className="font-semibold text-red-600 text-base">
           Alarma de
           {` ${variablesText[notification.variable].text || "variable"} ${
-            notification.eventType
+            notification.tipo_evento
           }`}
         </h5>
         <p className="text-sm font-semibold text-gray-800 dark:text-gray-400">
@@ -33,7 +33,14 @@ export default function NotificationCriticalCard({ notification, dismissFn }) {
           })} ${variablesText[notification.variable].unit}`}
         </p>
         <span className="text-sm text-gray-500 dark:text-gray-500">
-          {new Date(notification.t).toLocaleTimeString()}
+          {`Inicio: ${new Date(
+            notification.t_inicio * 1000
+          ).toLocaleTimeString()}`}
+        </span>
+        <span className="text-sm text-gray-500 dark:text-gray-500">
+          {`Última actualización: ${new Date(
+            notification.t_actual * 1000
+          ).toLocaleTimeString()}`}
         </span>
       </div>
       <div className="flex flex-1 justify-end text-gray-600 dark:text-gray-400 mt-1">
