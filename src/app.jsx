@@ -64,6 +64,9 @@ export function App() {
       if (tipo === "alarmas_historico") {
         return setTableData(data);
       }
+      if (tipo === "alarmas_historico_act") {
+        return setTableData((prev) => [...data, ...prev]);
+      }
     }
   }, [lastMessage]);
 
