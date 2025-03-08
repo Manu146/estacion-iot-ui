@@ -21,7 +21,7 @@ export function App() {
   const [view, setView] = useState("data"); //Data, Config
   const { readyState, lastMessage, send, status } = useWebSocket(
     "ws://localhost:3000/tiemporeal"
-  ); //`ws://${window.location.host}/ws`);
+  );
   const [displayData, setDisplayData] = useState(null);
   const [notifications, setNotifications] = useState({
     critical: [],
@@ -42,7 +42,7 @@ export function App() {
     if (readyState === ReadyState.OPEN) {
       send("test message");
     }
-  }, [readyState, send]); // make sure to include send in dependency array
+  }, [readyState, send]);
 
   useEffect(() => {
     if (lastMessage) {
@@ -65,14 +65,9 @@ export function App() {
       if (tipo === "alarmas_historico") {
         return setTableData(data);
       }
-      //NOTE - INNECESARIO???
-      /*if (tipo === "alarmas_historico_act") {
-        return setTableData((prev) => [...data, ...prev]);
-      }*/
     }
   }, [lastMessage]);
 
-  const Icon = view === "data" ? Settings : MoveLeft;
   return (
     <main className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
