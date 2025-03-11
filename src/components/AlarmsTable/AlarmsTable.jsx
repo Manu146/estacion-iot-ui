@@ -5,9 +5,9 @@ export default function AlarmsTable({ alarms }) {
     <div className="rounded-lg border bg-white dark:bg-gray-900 p-6 dark:border-gray-700 border-gray-200 shadow-sm mt-4">
       <div className="flex flex-col p-6">
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-          AlarmsTable
+          Historial de alarmas
         </h3>
-        <p className="text-sm text-gray-400">Hola</p>
+        <p className="text-sm text-gray-400">Registro de alarmas pasadas</p>
       </div>
       <div className="p-6 pt-0">
         <div className="rounded-md border dark:border-gray-700 border-gray-200">
