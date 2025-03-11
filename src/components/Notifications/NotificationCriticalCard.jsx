@@ -8,7 +8,6 @@ const variablesText = {
   presion: { text: "presión", unit: "atm" },
   velocidad: { text: "velocidad de viento", unit: "m/s" },
   pluviosidad: { text: "pluviosidad", unit: "mm" },
-  direccion: { text: "variable", unit: "°" },
 };
 
 export default function NotificationCriticalCard({ notification, dismissFn }) {
