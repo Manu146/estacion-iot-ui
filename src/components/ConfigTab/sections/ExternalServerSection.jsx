@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useState, useEffect, useRef, useContext } from "preact/hooks";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -34,14 +35,11 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function ExternalServerSection({
-  backFn,
-  token,
-  returnToLogin,
-}) {
+export default function ExternalServerSection() {
   const [formData, setFormData] = useState({ url: "", puerto: "" });
   const [errors, setErrors] = useState({ url: false, puerto: false });
   const [message, setMessage] = useState({ text: "", type: "" });
+  const { token, setToken } = useContext(AuthContext);
   const timeoutRef = useRef(null);
 
   const { url, puerto } = formData;
@@ -89,13 +87,20 @@ export default function ExternalServerSection({
           type: "success",
         });
       } else if (res.status === 401) {
-        setMessage({
-          text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
-          type: "error",
-        });
-        timeoutRef.current = setTimeout(() => {
-          returnToLogin();
-        }, 2000);
+        if (timeoutRef.current === null) {
+          timeoutRef.current = setTimeout(() => {
+            setMessage({ text: "", type: "" });
+            setToken(null);
+            location.route("/config");
+          }, 2000);
+        } else {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = setTimeout(() => {
+            setMessage({ text: "", type: "" });
+            setToken(null);
+            location.route("/config");
+          }, 2000);
+        }
       } else {
         setMessage({
           text: "Error al guardar los cambios. Inténtelo de nuevo.",
@@ -111,12 +116,12 @@ export default function ExternalServerSection({
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-start">
-          <button
+          <a
             className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
-            onClick={backFn}
+            href="/config"
           >
             <MoveLeft />
-          </button>
+          </a>
           <div className="flex flex-col">
             <h2 class="text-3xl font-bold dark:text-white mb-2">
               Servidor externo

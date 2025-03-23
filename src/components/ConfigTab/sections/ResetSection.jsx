@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "preact/hooks";
+import { useState, useRef, useEffect, useContext } from "preact/hooks";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -16,8 +17,9 @@ const saveConfig = async (token) => {
   });
 };
 
-export default function ResetSection({ backFn, token }) {
+export default function ResetSection() {
   const [message, setMessage] = useState({ text: "", type: "" });
+  const { token, setToken } = useContext(AuthContext);
   const timeoutRef = useRef(null);
 
   useEffect(() => {
@@ -39,23 +41,45 @@ export default function ResetSection({ backFn, token }) {
       timeoutRef.current = setTimeout(() => {
         window.location.reload();
       }, 3000);
+      return;
+    } else if (response.status === 401) {
+      setMessage({
+        text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
+        type: "error",
+      });
+      if (timeoutRef.current === null) {
+        timeoutRef.current = setTimeout(() => {
+          setMessage({ text: "", type: "" });
+          setToken(null);
+          location.route("/config");
+        }, 2000);
+      } else {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          setMessage({ text: "", type: "" });
+          setToken(null);
+          location.route("/config");
+        }, 2000);
+      }
+      return;
     } else {
       setMessage({
         text: "Error al restablecer el dispositivo. Inténtelo de nuevo.",
         type: "error",
       });
+      return;
     }
   };
 
   return (
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="flex items-start border-b border-gray-200 dark:border-gray-700 p-6">
-        <button
+        <a
           className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
-          onClick={backFn}
+          href="/config"
         >
           <MoveLeft />
-        </button>
+        </a>
         <div className="flex flex-col">
           <h2 class="text-3xl font-bold dark:text-white mb-2">
             Restablecer dispositivo

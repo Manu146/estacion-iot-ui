@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useState, useEffect, useRef, useContext } from "preact/hooks";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../../config";
 
@@ -35,7 +36,7 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function WifiSection({ backFn, token, returnToLogin }) {
+export default function WifiSection() {
   const [formData, setFormData] = useState({
     mode: "1",
     ssid: "",
@@ -51,6 +52,7 @@ export default function WifiSection({ backFn, token, returnToLogin }) {
     gateway: false,
     fetch: false,
   });
+  const { token, setToken } = useContext(AuthContext);
   const [message, setMessage] = useState({ text: "", type: "" });
 
   const timeoutRef = useRef(null);
@@ -114,13 +116,15 @@ export default function WifiSection({ backFn, token, returnToLogin }) {
           if (timeoutRef.current === null) {
             timeoutRef.current = setTimeout(() => {
               setMessage({ text: "", type: "" });
-              returnToLogin();
+              setToken(null);
+              location.route("/config");
             }, 2000);
           } else {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = setTimeout(() => {
               setMessage({ text: "", type: "" });
-              returnToLogin();
+              setToken(null);
+              location.route("/config");
             }, 2000);
           }
           return;
@@ -150,12 +154,12 @@ export default function WifiSection({ backFn, token, returnToLogin }) {
   return (
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="flex border-b border-gray-200 dark:border-gray-700 p-6">
-        <button
-          onClick={backFn}
+        <a
+          href="/config"
           className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
         >
           <MoveLeft />
-        </button>
+        </a>
         <h2 class="text-3xl font-bold dark:text-white mb-2">Red</h2>
       </div>
       <form class="p-6" onSubmit={onSubmit}>

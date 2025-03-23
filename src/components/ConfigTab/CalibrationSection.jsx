@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useState, useEffect, useRef, useContext } from "preact/hooks";
+import { AuthContext } from "../../contexts/AuthContext";
 import { MoveLeft } from "lucide-preact";
 import { BASE_URL } from "../../config";
 
@@ -33,7 +34,7 @@ const saveConfig = async (data, token) => {
   });
 };
 
-export default function CalibrationSection({ backFn, token, returnToLogin }) {
+export default function CalibrationSection() {
   const [formData, setFormData] = useState({
     solar: "",
     anemometro: "",
@@ -45,8 +46,11 @@ export default function CalibrationSection({ backFn, token, returnToLogin }) {
     pluviometro: false,
   });
   const [message, setMessage] = useState({ text: "", type: "" });
+  const { token, setToken } = useContext(AuthContext);
 
   const { solar, anemometro, pluviometro } = formData;
+
+  const timeoutRef = useRef(null);
 
   useEffect(async () => {
     try {
@@ -91,9 +95,21 @@ export default function CalibrationSection({ backFn, token, returnToLogin }) {
           text: "La sesión ha expirado. Por favor, inicie sesión nuevamente.",
           type: "error",
         });
-        setTimeout(() => {
-          returnToLogin();
-        }, 2000);
+        if (timeoutRef.current === null) {
+          timeoutRef.current = setTimeout(() => {
+            setMessage({ text: "", type: "" });
+            setToken(null);
+            location.route("/config");
+          }, 2000);
+        } else {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = setTimeout(() => {
+            setMessage({ text: "", type: "" });
+            setToken(null);
+            location.route("/config");
+          }, 2000);
+        }
+        return;
       } else {
         setMessage({
           text: "Error al guardar los cambios. Inténtelo de nuevo.",
@@ -108,12 +124,12 @@ export default function CalibrationSection({ backFn, token, returnToLogin }) {
   return (
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="flex p-6 border-b border-gray-200 dark:border-gray-700">
-        <button
+        <a
           className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
-          onClick={backFn}
+          href="/config"
         >
           <MoveLeft />
-        </button>
+        </a>
         <h2 className="text-3xl font-bold dark:text-white mb-2">Calibración</h2>
       </div>
       <form onSubmit={onSubmit} className="p-6">

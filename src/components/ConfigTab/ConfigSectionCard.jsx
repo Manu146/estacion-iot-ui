@@ -1,13 +1,4 @@
-import {
-  BellRing,
-  Wifi,
-  CloudUpload,
-  HardDriveDownload,
-  Wrench,
-  RotateCcw,
-} from "lucide-preact";
-
-export default function ConfigSectionCard({ card, handleViewChange }) {
+export default function ConfigSectionCard({ card }) {
   const { icon: Icon, title, text, name } = card;
   return (
     <div className="rounded-lg border bg-white dark:bg-gray-900 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-950 dark:text-gray-50 border-gray-200 dark:border-gray-700">
@@ -21,13 +12,12 @@ export default function ConfigSectionCard({ card, handleViewChange }) {
       </div>
       <div className="p-6 pt-0">
         <p className="text-sm text-gray-500 dark:text-gray-400">{text}</p>
-        <button
-          onClick={handleViewChange}
-          name={name}
+        <a
+          href={`/config/${name}`}
           className="p-1 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold h-10 mt-2 w-full justify-start text-green-700 transition-colors hover:bg-gray-300 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         >
           Configurar
-        </button>
+        </a>
       </div>
     </div>
   );
