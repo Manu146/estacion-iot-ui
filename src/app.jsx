@@ -6,6 +6,7 @@ import Notifiactions from "./components/Notifications/Notificacions";
 import { AuthProvider } from "./contexts/AuthContext";
 import ConfigRoot from "./components/ConfigTab/ConfigRoot";
 import NotFound from "./routes/NotFound";
+import ThemeToggle from "./components/ThemeToggle";
 
 const Home = lazy(() => import("./routes/Home"));
 const Config = lazy(() => import("./routes/Config"));
@@ -69,9 +70,12 @@ export function App() {
       <AuthProvider>
         <main className="min-h-screen p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <h1 class="mb-6 text-3xl font-bold leading-none tracking-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
-              Estación meteorológica IoT UC
-            </h1>
+            <div className="flex justify-between items-center">
+              <h1 class="mb-6 text-3xl font-bold leading-none tracking-tight text-gray-900 md:text-4xl lg:text-5xl dark:text-white">
+                Estación meteorológica IoT UC
+              </h1>
+              <ThemeToggle />
+            </div>
             <div className="h-10 items-center justify-center rounded-md bg-gray-100 text-gray-400 dark:bg-gray-700 p-1 dark:text-gray-400 grid w-full grid-cols-2">
               <a
                 href="/"
