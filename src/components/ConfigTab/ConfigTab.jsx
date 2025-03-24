@@ -21,8 +21,10 @@ export default function ConfigTab() {
   const { token } = useContext(AuthContext);
   const location = useLocation();
 
+  console.log(token);
+
   useEffect(() => {
-    if (!token) location.route("/config");
+    if (!token) location.route("/configuracion");
   }, [token]);
 
   return (

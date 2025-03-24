@@ -108,7 +108,7 @@ export default function DataSection() {
     <div className="max-w-lg mx-auto rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
       <div className="flex border-b border-gray-200 dark:border-gray-700 p-6">
         <a
-          href="/config"
+          href="/configuracion"
           className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
         >
           <MoveLeft />

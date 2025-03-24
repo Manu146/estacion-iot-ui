@@ -46,18 +46,20 @@ const configCards = {
 };
 
 export default function ConfigRoot() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const { token, setToken } = useContext(AuthContext);
   const location = useLocation();
   const closeModal = () => setIsOpen(false);
   const closeModalBack = () => {
     closeModal();
-    location.route("/config");
+    location.route("/");
   };
+
   useEffect(() => {
     if (!token) setIsOpen(true);
     else setIsOpen(false);
   }, [token]);
+
   return (
     <div className="mt-6">
       <LoginModal

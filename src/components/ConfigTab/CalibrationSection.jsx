@@ -126,7 +126,7 @@ export default function CalibrationSection() {
       <div className="flex p-6 border-b border-gray-200 dark:border-gray-700">
         <a
           className="text-gray-600 dark:text-gray-600 mr-5 p-2 rounded-full hover:bg-slate-200 transition-colors"
-          href="/config"
+          href="/configuracion"
         >
           <MoveLeft />
         </a>

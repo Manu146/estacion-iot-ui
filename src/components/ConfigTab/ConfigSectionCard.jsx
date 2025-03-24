@@ -13,7 +13,7 @@ export default function ConfigSectionCard({ card }) {
       <div className="p-6 pt-0">
         <p className="text-sm text-gray-500 dark:text-gray-400">{text}</p>
         <a
-          href={`/config/${name}`}
+          href={`/configuracion/${name}`}
           className="p-1 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold h-10 mt-2 w-full justify-start text-green-700 transition-colors hover:bg-gray-300 hover:text-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         >
           Configurar
