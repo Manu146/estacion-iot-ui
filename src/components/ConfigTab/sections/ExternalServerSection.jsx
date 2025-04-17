@@ -36,13 +36,13 @@ const saveConfig = async (data, token) => {
 };
 
 export default function ExternalServerSection() {
-  const [formData, setFormData] = useState({ url: "", puerto: "" });
-  const [errors, setErrors] = useState({ url: false, puerto: false });
+  const [formData, setFormData] = useState({ url: "" });
+  const [errors, setErrors] = useState({ url: false });
   const [message, setMessage] = useState({ text: "", type: "" });
   const { token, setToken } = useContext(AuthContext);
   const timeoutRef = useRef(null);
 
-  const { url, puerto } = formData;
+  const { url } = formData;
 
   useEffect(async () => {
     try {
@@ -69,16 +69,13 @@ export default function ExternalServerSection() {
     e.preventDefault();
     let validation = {
       url: false,
-      puerto: false,
     };
 
     if (url === "") validation = { ...validation, url: true };
-    if (puerto === "") validation = { ...validation, puerto: true };
 
-    if (!(validation.url || validation.puerto)) {
+    if (!validation.url) {
       setErrors({
         url: false,
-        puerto: false,
       });
       let res = await saveConfig(formData, token);
       if (res.status === 200) {
@@ -151,28 +148,6 @@ export default function ExternalServerSection() {
               value={url}
             />
             {errors.url && (
-              <p class="mt-2 text-sm text-red-600 dark:text-red-500">
-                <span class="font-medium">Ingrese un valor válido.</span>
-              </p>
-            )}
-          </div>
-          <div class="">
-            <label
-              for="url"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Puerto
-            </label>
-            <input
-              type="number"
-              id="puerto"
-              class={`${errors.puerto ? errorStyle : baseStyle} w-full md:w-24`}
-              required
-              name="puerto"
-              onInput={updateForm}
-              value={puerto}
-            />
-            {errors.port && (
               <p class="mt-2 text-sm text-red-600 dark:text-red-500">
                 <span class="font-medium">Ingrese un valor válido.</span>
               </p>
