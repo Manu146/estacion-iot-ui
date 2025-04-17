@@ -1,6 +1,7 @@
 import Cards from "../components/cards/Cards";
 import Chart from "../components/chart/Chart";
 import AlarmsTable from "../components/AlarmsTable/AlarmsTable";
+import DownloadDataForm from "../components/DownloadDataForm";
 import { ReadyState } from "../hooks/useWs";
 
 const stringToday = new Date(Date.now()).toLocaleDateString("es-ES", {
@@ -44,6 +45,7 @@ export default function Home({ displayData, tablData, readyState }) {
       <Cards data={displayData}></Cards>
       <Chart />
       <AlarmsTable alarms={tablData} />
+      <DownloadDataForm />
     </>
   );
 }
